@@ -352,7 +352,7 @@ func sortIssuesByRank(issues []*model.Issue) {
 		if pi != pj {
 			return pi < pj
 		}
-		return issues[i].CreatedAt.After(issues[j].CreatedAt)
+		return issues[i].CreatedAt.Before(issues[j].CreatedAt)
 	})
 }
 
@@ -457,7 +457,7 @@ func RenderGroupedTable(issues []*model.Issue, parentMap map[int]*model.Issue, p
 		return RenderTable(issues, false)
 	}
 
-	// Sort parent groups by status rank, priority rank, created_at DESC.
+	// Sort parent groups by status rank, priority rank, created_at ASC.
 	sort.SliceStable(groups, func(i, j int) bool {
 		si, sj := statusRank(groups[i].parent.Status), statusRank(groups[j].parent.Status)
 		if si != sj {
@@ -467,7 +467,7 @@ func RenderGroupedTable(issues []*model.Issue, parentMap map[int]*model.Issue, p
 		if pi != pj {
 			return pi < pj
 		}
-		return groups[i].parent.CreatedAt.After(groups[j].parent.CreatedAt)
+		return groups[i].parent.CreatedAt.Before(groups[j].parent.CreatedAt)
 	})
 
 	// Sort children within each group.
