@@ -86,7 +86,7 @@ func main() {
 	}
 
 	_, err = artifact.
-		NewProjectEnvironment("docket-shell", Systems).
+		NewDevelopmentEnvironment("docket-shell", Systems).
 		WithArtifacts([]*string{
 			ffmpeg,
 			gobin,
