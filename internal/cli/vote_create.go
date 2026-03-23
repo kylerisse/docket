@@ -13,6 +13,7 @@ import (
 	"github.com/ALT-F4-LLC/docket/internal/output"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 var voteCreateCmd = &cobra.Command{
@@ -48,8 +49,21 @@ var voteCreateCmd = &cobra.Command{
 			return cmdErr(fmt.Errorf("--voters is required"), output.ErrValidation)
 		}
 
-		// If no description and not JSON mode, launch interactive form.
-		if !jsonMode && description == "" {
+		// Determine if all required flags are present.
+		allRequiredPresent := description != "" && cmd.Flags().Changed("voters")
+
+		// Interactive form when not in JSON mode and required flags are missing.
+		if !jsonMode && !allRequiredPresent {
+			if !term.IsTerminal(int(os.Stdin.Fd())) {
+				var missing []string
+				if description == "" {
+					missing = append(missing, "--description")
+				}
+				if !cmd.Flags().Changed("voters") {
+					missing = append(missing, "--voters")
+				}
+				return cmdErr(fmt.Errorf("non-interactive environment detected; provide all required flags: %s", strings.Join(missing, ", ")), output.ErrValidation)
+			}
 			votersStr := ""
 			if cmd.Flags().Changed("voters") {
 				votersStr = fmt.Sprintf("%d", voters)

@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/huh"
@@ -15,6 +16,7 @@ import (
 	"github.com/ALT-F4-LLC/docket/internal/output"
 	"github.com/ALT-F4-LLC/docket/internal/render"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 type labelDeleteResult struct {
@@ -225,6 +227,10 @@ var labelDeleteCmd = &cobra.Command{
 		if !force && label.IssueCount > 0 {
 			if w.JSONMode {
 				return cmdErr(fmt.Errorf("cannot delete label %q without --force in JSON mode (attached to %d issue(s))", name, label.IssueCount), output.ErrValidation)
+			}
+
+			if !term.IsTerminal(int(os.Stdin.Fd())) {
+				return cmdErr(fmt.Errorf("non-interactive environment detected; label %q is attached to %d issue(s): use --force to skip confirmation", name, label.IssueCount), output.ErrValidation)
 			}
 
 			var confirm bool

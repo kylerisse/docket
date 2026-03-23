@@ -12,6 +12,7 @@ import (
 	"github.com/ALT-F4-LLC/docket/internal/output"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 type importResult struct {
@@ -58,6 +59,9 @@ var importCmd = &cobra.Command{
 		if replace {
 			// In human mode, prompt for confirmation.
 			if !w.JSONMode {
+				if !term.IsTerminal(int(os.Stdin.Fd())) {
+					return cmdErr(fmt.Errorf("non-interactive environment detected; use --json mode with --replace to skip confirmation"), output.ErrValidation)
+				}
 				var confirmed bool
 				form := huh.NewForm(
 					huh.NewGroup(

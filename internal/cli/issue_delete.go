@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/ALT-F4-LLC/docket/internal/config"
 	"github.com/ALT-F4-LLC/docket/internal/db"
@@ -11,6 +12,7 @@ import (
 	"github.com/ALT-F4-LLC/docket/internal/output"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 type deleteResult struct {
@@ -74,6 +76,9 @@ var deleteCmd = &cobra.Command{
 		}
 
 		// Interactive prompt.
+		if !term.IsTerminal(int(os.Stdin.Fd())) {
+			return cmdErr(fmt.Errorf("non-interactive environment detected; issue %s has %d sub-issue(s): use --force to cascade-delete or --orphan to make them root issues", model.FormatID(id), len(subIssues)), output.ErrValidation)
+		}
 		var choice string
 		form := huh.NewForm(
 			huh.NewGroup(

@@ -12,6 +12,7 @@ import (
 	"github.com/ALT-F4-LLC/docket/internal/output"
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 var createCmd = &cobra.Command{
@@ -42,6 +43,9 @@ var createCmd = &cobra.Command{
 		// defaults ("backlog", "none", "task"). Passing them via .Value(...)
 		// ensures the select widgets pre-select the matching default.
 		if !jsonMode && title == "" {
+			if !term.IsTerminal(int(os.Stdin.Fd())) {
+				return cmdErr(fmt.Errorf("non-interactive environment detected; provide all required flags: --title"), output.ErrValidation)
+			}
 			var labelStr string
 			var fileStr string
 			form := huh.NewForm(
